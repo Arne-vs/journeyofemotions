@@ -1,42 +1,92 @@
-import { useState } from "react"
+import Link from 'next/link';
+import { useState, useEffect, useRef } from 'react';
+import whisper from './whisper';
+import generategpt from './gpt';
+import makeArt from './art';
+import background from './background';
+import titel from './images/titel.png';
+import Image from 'next/image';
 
 export default function MyPage() {
-  const [prompt, setPrompt] = useState("")
-  const [answer, setAnswer] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const canvas = useRef();
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    setIsLoading(true)
+  const [step, setStep] = useState('titel');
+  const [image, setImage] = useState('');
 
-    const response = await fetch("/api/get-answer", {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ prompt: prompt })
-    })
-    const data = await response.json()
-    setAnswer(data.text.trim())
-    setIsLoading(false)
+  function createImage(img) {
+    setStep('imageAvailable');
+    setImage(img);
+
+    const timer = setTimeout(() => {
+      fetch('/api/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: img }),
+      });
+      setStep('einde');
+    }, 10000);
   }
 
-  function handleChange(e) {
-    setPrompt(e.target.value)
+  function art(answer) {
+    console.log(answer);
+    setStep('makingImage');
+    makeArt(answer, createImage);
   }
+  function gpt(transcript) {
+    generategpt(transcript, art);
+    setStep('readingStory');
+  }
+
+  useEffect(() => {
+    const context = canvas.current.getContext('2d');
+    background(context);
+
+    const timer = setTimeout(() => {
+      whisper(gpt);
+      setStep('listening');
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div className="container">
-      <h1>Give Any Instruction</h1>
-      <form className="our-form" onSubmit={handleSubmit}>
-        <input className="prompt-field" type="text" onChange={handleChange} />
-        <button className="prompt-button">Go!</button>
-      </form>
+    <>
+      <canvas id="canvas" ref={canvas}></canvas>
+      {step === 'titel' ? (
+        <div>
+          <Image src={titel} className="titel" />
+        </div>
+      ) : null}
 
-      {isLoading && <div className="loading-spinner"></div>}
+      {step === 'listening' ? (
+        <div>
+          <h1>Je mag je verhaal vertellen</h1>
+        </div>
+      ) : null}
 
-      <div className="answer-area">{answer}</div>
-    </div>
-  )
+      {step === 'readingStory' ? (
+        <div>
+          <h1>We zijn je verhaal aan het analyseren</h1>
+        </div>
+      ) : null}
+
+      {step === 'makingImage' ? (
+        <div>
+          <h1>Verhaal wordt gevisualiseerd</h1>
+        </div>
+      ) : null}
+
+      {step === 'imageAvailable' ? (
+        <div>
+          <img src={image}></img>
+        </div>
+      ) : null}
+      {step === 'einde' ? (
+        <div>
+          <h1>Bedankt om je verhaal te vertellen</h1>
+        </div>
+      ) : null}
+    </>
+  );
 }
