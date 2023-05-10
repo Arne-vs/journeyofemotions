@@ -26,6 +26,9 @@ export default function MyPage() {
         body: JSON.stringify({ image: img }),
       });
       setStep('einde');
+      setTimeout(() => {
+        location.reload();
+      }, 15000);
     }, 10000);
   }
 
@@ -43,11 +46,19 @@ export default function MyPage() {
     const context = canvas.current.getContext('2d');
     background(context);
 
-    const timer = setTimeout(() => {
-      whisper(gpt);
-      setStep('listening');
-    }, 10000);
-    return () => clearTimeout(timer);
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript;
+      if (transcript.includes('start')) {
+        whisper(gpt);
+        setStep('listening');
+      }
+    };
+
+    recognition.start();
   }, []);
 
   return (
@@ -84,7 +95,13 @@ export default function MyPage() {
       ) : null}
       {step === 'einde' ? (
         <div>
-          <h1>Bedankt om je verhaal te vertellen</h1>
+          <h1>
+            Bedankt om je verhaal te vertellen<br></br>
+            <span>
+              Je kan je visualisatie terugvinden op
+              arnevs.be/journey-of-emotions-2/
+            </span>
+          </h1>
         </div>
       ) : null}
     </>
