@@ -32,7 +32,7 @@ h1 {
   font-family: 'Rubik', sans-serif;
   font-size: 55pt;
   text-align: center;
-  filter: drop-shadow(1px 1px 12px #ffffff);
+  filter: drop-shadow(1px 1px 4px #ffffff);
 }
 
 h1 span {

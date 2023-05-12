@@ -49,6 +49,7 @@ export default function MyPage() {
     const recognition = new webkitSpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
+    recognition.lang = 'nl-BE';
 
     recognition.onresult = (event) => {
       const transcript = event.results[event.results.length - 1][0].transcript;
