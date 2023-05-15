@@ -50,14 +50,19 @@ export default function MyPage() {
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = 'nl-BE';
+    let startNot;
 
     recognition.onresult = (event) => {
       const transcript = event.results[event.results.length - 1][0].transcript;
       if (transcript.includes('start')) {
         whisper(gpt);
         setStep('listening');
+        clearTimeout(startNot);
       }
     };
+    startNot = setTimeout(() => {
+      location.reload(); // Reload the page after 5 seconds
+    }, 9000);
 
     recognition.start();
   }, []);
