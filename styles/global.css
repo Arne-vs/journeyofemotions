@@ -6,7 +6,7 @@ body {
   margin: 0;
 }
 
-div {
+.mainflow {
   z-index: 9999;
   position: absolute;
   width: 100vw;
@@ -32,14 +32,18 @@ h1 {
   font-family: 'Rubik', sans-serif;
   font-size: 55pt;
   text-align: center;
-  filter: drop-shadow(1px 1px 4px #ffffff);
+  filter: drop-shadow(1px 1px 1px #ffffff);
 }
 
-h1 span {
+h1 div {
   color: white;
   font-weight: 400;
   font-family: 'Rubik', sans-serif;
   font-size: 25pt;
   text-align: center;
   filter: drop-shadow(1px 1px 0.2px #ffffff);
+}
+
+.qr {
+  margin-top: 2rem;
 }

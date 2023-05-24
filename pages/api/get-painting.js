@@ -19,14 +19,14 @@ export default async function handler(req, res) {
       res.status(200).json({ text: response.data.data[0].url });
     } else {
       res.status(200).json({
-        text: 'https://images.dog.ceo/breeds/ridgeback-rhodesian/n02087394_1722.jpg',
+        text: 'https://i.ibb.co/4jtHx0p/5b19f1295655d1ea62d5b7d8e570a9cefbcf3526.png',
       });
     }
   } catch (e) {
-    console.log('cqtch');
+    console.log('catch');
     console.log(e);
     res.status(200).json({
-      text: 'https://images.dog.ceo/breeds/ridgeback-rhodesian/n02087394_1722.jpg',
+      text: 'https://i.ibb.co/4jtHx0p/5b19f1295655d1ea62d5b7d8e570a9cefbcf3526.png',
     });
   }
 }

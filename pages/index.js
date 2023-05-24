@@ -6,6 +6,7 @@ import makeArt from './art';
 import background from './background';
 import titel from './images/titel.png';
 import Image from 'next/image';
+import qr from './images/qrcodeWim.png';
 
 export default function MyPage() {
   const canvas = useRef();
@@ -71,42 +72,44 @@ export default function MyPage() {
     <>
       <canvas id="canvas" ref={canvas}></canvas>
       {step === 'titel' ? (
-        <div>
+        <div className="mainflow">
           <Image src={titel} className="titel" />
         </div>
       ) : null}
 
       {step === 'listening' ? (
-        <div>
+        <div className="mainflow">
           <h1>Je mag je verhaal vertellen</h1>
         </div>
       ) : null}
 
       {step === 'readingStory' ? (
-        <div>
+        <div className="mainflow">
           <h1>We zijn je verhaal aan het analyseren</h1>
         </div>
       ) : null}
 
       {step === 'makingImage' ? (
-        <div>
+        <div className="mainflow">
           <h1>Verhaal wordt gevisualiseerd</h1>
         </div>
       ) : null}
 
       {step === 'imageAvailable' ? (
-        <div>
+        <div className="mainflow">
           <img src={image}></img>
         </div>
       ) : null}
       {step === 'einde' ? (
-        <div>
+        <div className="mainflow">
           <h1>
             Bedankt om je verhaal te vertellen<br></br>
-            <span>
-              Je kan je visualisatie terugvinden op
-              arnevs.be/journey-of-emotions-2/
-            </span>
+            <div>
+              <div>Je kan je visualisatie terugvinden</div>
+              <div>
+                <Image src={qr} className="qr" width={400} heigth={400} />
+              </div>
+            </div>
           </h1>
         </div>
       ) : null}
