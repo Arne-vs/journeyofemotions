@@ -11,15 +11,15 @@ export default async function handler(req, res) {
     port: 587,
     secure: false,
     auth: {
-      user: 'arnescha2003@gmail.com',
-      pass: 'lpywjnnavrbjjbeb',
+      user: 'E-mail',
+      pass: 'wachtwoord',
     },
   });
 
   // send mail with defined transport object
   let info = await transporter.sendMail({
     from: '"Arne" <arnescha2003@gmail.com',
-    to: 'journeyofemotionsoc1hrpxe@gmail.com',
+    to: 'email_posts',
     subject: 'Journey of emotion',
     text: '',
     attachments: [
