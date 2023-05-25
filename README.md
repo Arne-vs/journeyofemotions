@@ -39,7 +39,7 @@ github: https://github.com/Arne-vs/journeyofemotions/tree/main
 
 ## Stap 3:
 
-Nu ga je in je terminal naar de map die je net hebt gecloned hier doe je “npm install”.
+Nu ga je in je terminal naar de map die je net hebt gecloned hier doe je `npm install`.
 
 ## Stap 4:
 
@@ -51,9 +51,13 @@ Nu ga je in je terminal naar de map die je net hebt gecloned hier doe je “npm 
 
 Api key in code zetten.
 Je heb je openai api-key en deze zet je in de .env.example file achter OPENAI.
+`OPENAI=`
 Achter yourEmail zet je u email dat je standaard gebruikt.
+`yourEmail=`
 Achter PasswordEmail zet je het wachtwoord van u email.
+`PasswordEmail=`
 Acter emailToSendPost zet je je net gemaakte uniek email adres
+`emailToSendPost=`
 
 Dit zet je allemaal weer in de git ignore zodat je het geheim houd.
 
@@ -61,7 +65,7 @@ Dit zet je allemaal weer in de git ignore zodat je het geheim houd.
 
 Nu staat alles op je laptop klaar
 
-en moet je enkel “npm run dev” in je terminal doen en surfen naar “localhost:3000”
+en moet je enkel `npm run dev` in je terminal doen en surfen naar `http://localhost:3000/`
 
 ## Stap 7:
 
@@ -73,8 +77,8 @@ Daarna lijm je de doos en zaag je gaten voor je ports van je beamer.
 ## Stap 8:
 
 Om de beamer op de juiste kanteling te nemen neem je een rilatine doosje.
-Deze rol je op en tape je vast als een soort cilinder.
-Dan plak je hem vast in het midden van de doos en op cm van de achterkant.
+Deze rol je op en tape je vast als een soort cilinder met een hoogte van 2cm.
+Dan plak je hem vast in het midden van de doos en op 3cm van de achterkant.
 
 ## Stap 9:
 
