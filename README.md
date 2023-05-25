@@ -1,6 +1,6 @@
 # Instructables setup Journey of emotion
 
-Journey of emotion is een interactive installaties waar je een verhaal aan verteld en die via meerdere ai’s omzet naar abstracte kunst. Je kan dus je verhaal vertellen en Journey of emotion zal deze visualiseren.
+Journey of emotion is een interactive installatie waar je een verhaal aan verteld en die via meerdere ai’s omzet naar abstracte kunst. Je kan dus je verhaal vertellen en Journey of emotion zal deze visualiseren.
 
 Dit kan gebruikt worden voor mensen die emotionele verhalen hebben of last hebben van mentale problemen. Zo kunnen zij hun verhaal doen en wordt dit visueel zichtbaar voor iedereen. Zo kan men beter begrijpen hoe je een ander zich voelt omdat de gedachten in ons hoofd niet zichtbaar zijn en mensen deze dan ook moeilijker begrijpen.
 
