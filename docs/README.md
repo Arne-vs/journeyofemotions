@@ -100,22 +100,26 @@ Nu de code helemaal is geïnstalleerd kan je een doos voor de beamer maken.
 
 Je download deze dfx file en lasercut hem.
 Daarna lijm je de doos en zaag je gaten voor je ports van je beamer.
+![cutfoto](img/cut.png)
 
 ## Stap 8:
 
 Om de beamer op de juiste kanteling te nemen neem je een rilatine doosje.
 Deze rol je op en tape je vast als een soort cilinder met een hoogte van 2cm.
 Dan plak je hem vast in het midden van de doos en op 3cm van de achterkant.
+![doos inside](img/doos%20_inside_rilatina.png)
 
 ## Stap 9:
 
 Nu je doos klaar is leg je je beamer in de doos.
 
 Daarna steek je de hdmi kabel en de power adapter al in de beamer maar NIET in het stopcontact.
+![doos](img/doos.png)
 
 ## Stap 10:
 
 Je hangt de doos met de beamer in aan de plakaten die aan het plafont hangen op de achterste 2 plakaten gekeken vanuit de muur warop je gaat projecteren en hang je hem op die plakaten zo dicht mogelijk tegen de muur waarop je gaat projecteren.
+![plafont](img/plaffont.png)
 
 ## Stap 11:
 
@@ -128,6 +132,7 @@ Je stelt je beamer in zodat hij recht op de muur projecteerd.
 ## Stap 13:
 
 Je hangt een webcam of kleine microfoon aan je laptop en stelt in dat hij deze moet gebruiken als microfoon.
+![mic](img/Microfoon.png)
 
 ## Stap 14:
 
