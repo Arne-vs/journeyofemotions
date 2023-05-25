@@ -67,6 +67,31 @@ Nu staat alles op je laptop klaar
 
 en moet je enkel `npm run dev` in je terminal doen en surfen naar `http://localhost:3000/`
 
+## code uitleg
+
+### index.js
+
+hier alles wat je ziet geschreven dus al de visuals worden via hier getoont.
+Dit is de hoofd pagina waar alles naartoe komt.
+
+### whisper.js
+
+in deze code word de stem opgenomen en omgezet naar text en geplaatst in het variable van transcript die geïmporteerd wordt in de answer.js
+
+### answer.js + get-answer.js
+
+Hier wordt de transcript omgezet via tex-davinci naar een prompt voor dall-e met de stijl abstracte kunst in het engels.
+De stijl en de vraag staat er altijd bij hetzelfde zodat je het juiste resultaat krijgt.
+Dit resultaat wordt als een variabele geïmporteerd in art.js
+
+### art.js + get-painting.js
+
+Hier wordt de prompt omgezet naar een afbeelding via text-to-image van dall-e en deze afbeelding wordt dan in de index opgevraagt en getoont.
+
+### sendEmail.js
+
+De gegenereerde afbeelding word hier gestuurd naar een email dat alles wat het aankrijgt post op mijn wordpress site.
+
 ## Stap 7:
 
 Nu de code helemaal is geïnstalleerd kan je een doos voor de beamer maken.
