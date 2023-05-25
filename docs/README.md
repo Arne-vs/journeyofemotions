@@ -43,7 +43,7 @@ Nu ga je in je terminal naar de map die je net hebt gecloned hier doe je `npm in
 
 ## Stap 4:
 
-1: je installeerd op je wordpress site postie en maakt een postpage
+1: je installeert op je wordpress site postie en maakt een postpage
 2: je maakt een email die uniek is en niet makkelijk te vinden is
 3: Je vult alles in zoals het hier staat met de email die je net hebt gemaakt
 
@@ -53,13 +53,16 @@ Nu ga je in je terminal naar de map die je net hebt gecloned hier doe je `npm in
 
 Api key in code zetten.
 Je heb je openai api-key en deze zet je in de .env.example file achter OPENAI.
-`OPENAI=`
 Achter yourEmail zet je u email dat je standaard gebruikt.
-`yourEmail=`
 Achter PasswordEmail zet je het wachtwoord van u email.
-`PasswordEmail=`
 Acter emailToSendPost zet je je net gemaakte uniek email adres
-`emailToSendPost=`
+
+```
+OPENAI=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
+yourEmail=arnescha2003@gmail.com
+PasswordEmail=lpywjnnavrbjjbeb
+emailToSendPost=journeyofemotionsoc1hrpxe@gmail.com
+```
 
 Dit zet je allemaal weer in de git ignore zodat je het geheim houd.
 
