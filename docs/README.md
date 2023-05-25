@@ -58,10 +58,10 @@ Achter PasswordEmail zet je het wachtwoord van u email.
 Acter emailToSendPost zet je je net gemaakte uniek email adres
 
 ```
-OPENAI=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
-yourEmail=arnescha2003@gmail.com
-PasswordEmail=lpywjnnavrbjjbeb
-emailToSendPost=journeyofemotionsoc1hrpxe@gmail.com
+OPENAI=
+yourEmail=
+PasswordEmail=
+emailToSendPost=
 ```
 
 Dit zet je allemaal weer in de git ignore zodat je het geheim houd.
