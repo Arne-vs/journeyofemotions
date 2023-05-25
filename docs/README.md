@@ -47,6 +47,8 @@ Nu ga je in je terminal naar de map die je net hebt gecloned hier doe je `npm in
 2: je maakt een email die uniek is en niet makkelijk te vinden is
 3: Je vult alles in zoals het hier staat met de email die je net hebt gemaakt
 
+![postiescreen](img/postie.png)
+
 ## Stap 5:
 
 Api key in code zetten.
