@@ -1,6 +1,6 @@
 // /pages/index.js
 import { useEffect, useRef, useState } from "react";
-import { playFromParams } from "./musicEngine"; // pas pad aan als nodig
+import { playTrack } from "../lib/musicPlayer";
 
 export default function Home() {
   const [status, setStatus] = useState("idle");
@@ -70,53 +70,86 @@ export default function Home() {
   }
 
   async function runPipeline(blob) {
-    setStatus("processing");
-    setError("");
+  setStatus("processing");
+  setError("");
 
-    if (stopMusicRef.current) {
-      try { stopMusicRef.current(); } catch {}
-      stopMusicRef.current = null;
-    }
+  // stop evt. vorige muziek
+  if (stopMusicRef.current) {
+    try { stopMusicRef.current(); } catch {}
+    stopMusicRef.current = null;
+  }
 
-    // 1) Transcribe
-    const t0 = performance.now();
-    const transcribeRes = await fetch("/api/transcribe", {
-      method: "POST",
-      headers: { "Content-Type": blob.type || "application/octet-stream" },
-      body: blob,
-    });
-    if (!transcribeRes.ok) throw new Error("Transcribe faalde");
-    const { text } = await transcribeRes.json();
-    setTranscript(text || "");
+  // 1) Transcribe
+  const transcribeRes = await fetch("/api/transcribe", {
+    method: "POST",
+    headers: { "Content-Type": blob.type || "application/octet-stream" },
+    body: blob,
+  });
+  if (!transcribeRes.ok) {
+    let d = "";
+    try { d = JSON.stringify(await transcribeRes.json()); } catch { d = await transcribeRes.text(); }
+    throw new Error(`Transcribe faalde: ${d}`);
+  }
+  const { text } = await transcribeRes.json();
+  setTranscript(text || "");
 
-    // 2) Prompt
-    const promptRes = await fetch("/api/prompt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ transcript: text || "" }),
-    });
-    if (!promptRes.ok) throw new Error("Prompt-generatie faalde");
-    const prompt = await promptRes.json();
-    setPromptJson(prompt);
+  // 2) Prompt → parameters
+  const promptRes = await fetch("/api/prompt", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ transcript: text || "" }),
+  });
+  if (!promptRes.ok) {
+    let d = "";
+    try { d = JSON.stringify(await promptRes.json()); } catch { d = await promptRes.text(); }
+    throw new Error(`Prompt-generatie faalde: ${d}`);
+  }
+  const prompt = await promptRes.json();
+  setPromptJson(prompt);
 
-    // 3) Image
-    const imgRes = await fetch("/api/image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(prompt),
-    });
-    if (!imgRes.ok) throw new Error("Afbeeldingsgeneratie faalde");
-    const { imageBase64 } = await imgRes.json();
+  // === 3) Beeld en Muziek PARALLEL starten ===
+  const imagePromise = fetch("/api/image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      art_prompt: prompt.art_prompt,
+      palette: prompt.palette,
+      style: prompt.style,
+      // gebruik dezelfde constants die je bovenaan definieerde
+      size: "1536x1024",         // bv. "1536x1024" (GPT-image-1) of "1792x1024" (DALL·E 3)
+      quality: "low",   // "low" | "medium" | "high"
+    }),
+  }).then(async (r) => {
+    if (!r.ok) throw new Error(`Afbeeldingsgeneratie faalde: ${await r.text()}`);
+    const { imageBase64 } = await r.json();
     const url = "data:image/png;base64," + imageBase64;
     setImageUrl(url);
+  });
 
-    // 4) Muziek
-    stopMusicRef.current = await playFromParams(prompt?.music);
+  const musicPromise = fetch("/api/choose-track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ transcript: text || "" }),
+  }).then(async (r) => {
+    if (!r.ok) throw new Error(`Track-selectie faalde: ${await r.text()}`);
+    const pick = await r.json();
 
-    const dt = Math.round(performance.now() - t0);
-    console.log(`Pipeline klaar in ${dt} ms`);
-    setStatus("done");
-  }
+    // crossfade van vorige (al gestopt hierboven) en speel nieuwe
+    stopMusicRef.current = await playTrack(pick.url, { fadeIn: 0.9, fadeOut: 0.9 });
+
+    // optioneel: toon wat info
+    setNowPlaying(`🎵 ${pick.title}${pick.reason ? " — " + pick.reason : ""}`);
+  }).catch((e) => {
+    console.warn("Muziek kon niet starten:", e);
+    setNowPlaying("Muziek kon niet starten (klik in de pagina en probeer opnieuw).");
+  });
+
+  // wacht tot beide klaar zijn (of de langzaamste)
+  await Promise.allSettled([imagePromise, musicPromise]);
+
+  setStatus("done");
+}
+
 
   return (
     <div style={styles.page}>
