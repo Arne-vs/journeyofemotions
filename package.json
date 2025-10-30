@@ -23,6 +23,7 @@
     "tone": "^14.9.17"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.14.4",
     "cross-env": "^10.0.0"
   }
 }
