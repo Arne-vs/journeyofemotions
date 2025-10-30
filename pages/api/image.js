@@ -11,19 +11,18 @@ export default async function handler(req, res) {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const art_prompt = (body.art_prompt || "").toString().trim();
     const palette = (body.palette || "warm").toString();
-    const style = (body.style || "geometric").toString();
 
     if (!art_prompt) {
       return res.status(400).json({ error: "missing_art_prompt" });
     }
 
-    const styleHint = `abstract ${style} style, ${palette} palette, high contrast, gallery lighting`;
+    const styleHint = `expressive abstract style, ${palette} palette, high contrast, gallery lighting`;
     const prompt = `${art_prompt}. ${styleHint}`;
 
     const result = await openai.images.generate({
       model: "gpt-image-1",   // of "dall-e-3"
       prompt,
-      size: "1024x1024",
+      size: "1536x1024",
     });
 
     const b64 = result?.data?.[0]?.b64_json;

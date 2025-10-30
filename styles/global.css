@@ -17,8 +17,10 @@ body {
   justify-content: center; /* Horizontally align items in the center */
 }
 img {
-  width: 40%;
-  filter: drop-shadow(1px 1px 12px #ffffff);
+  width: 50vw;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .titel {
@@ -30,9 +32,7 @@ h1 {
   color: white;
   font-weight: 900;
   font-family: 'Rubik', sans-serif;
-  font-size: 55pt;
-  text-align: center;
-  filter: drop-shadow(1px 1px 1px #ffffff);
+  font-size: 40pt;
 }
 
 h1 div {
