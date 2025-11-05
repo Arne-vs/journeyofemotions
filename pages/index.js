@@ -190,10 +190,10 @@ async function startRecording() {
     // 1) Transcribe
     const transcribeRes = await fetch("/api/transcribe", {
       method: "POST",
-      headers: { "Content-Type": blob.type || "application/octet-stream" },
+      // Zet bewust een simpele content-type om rare 405/preflight te vermijden
+      headers: { "Content-Type": "application/octet-stream" },
       body: blob,
     });
-
     if (!transcribeRes.ok) throw new Error(`Transcribe faalde: ${await safeTxt(transcribeRes)}`);
     const { text } = await transcribeRes.json();
     setTranscript(text || "");
