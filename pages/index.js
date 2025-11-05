@@ -165,11 +165,12 @@ export default function Home() {
     }
 
     // 1) Transcribe
-    const transcribeRes = await fetch("/api/transcribe", {
-      method: "POST",
-      headers: { "Content-Type": blob.type || "application/octet-stream" },
-      body: blob,
-    });
+ const transcribeRes = await fetch("/api/transcribe", {
+  method: "POST",
+  headers: { "Content-Type": blob.type || "application/octet-stream" },
+  body: blob,
+});
+
     if (!transcribeRes.ok) throw new Error(`Transcribe faalde: ${await safeTxt(transcribeRes)}`);
     const { text } = await transcribeRes.json();
     setTranscript(text || "");
