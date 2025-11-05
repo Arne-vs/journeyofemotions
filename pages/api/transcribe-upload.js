@@ -13,6 +13,10 @@ async function readBuffer(req) {
 }
 
 export default async function handler(req, res) {
+    console.log("=== TRANSCRIBE ROUTE HIT ===");
+    console.log("Method:", req.method);
+    console.log("Headers:", req.headers);
+
   // allow OPTIONS/HEAD to avoid preflight 405s
   if (req.method === "OPTIONS" || req.method === "HEAD") {
     res.setHeader("Allow", "POST, OPTIONS, HEAD");
@@ -25,6 +29,7 @@ export default async function handler(req, res) {
 
   try {
     const buf = await readBuffer(req);
+    console.log("Buffer size:", buf.length);
     const size = buf?.length || 0;
     if (!size) {
       return res.status(400).json({ error: "empty_audio", message: "No audio bytes received" });
@@ -57,10 +62,13 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ text: resp.text || "" });
   } catch (e) {
-    console.error("TRANSCRIBE_UPLOAD_ERROR", e);
+    console.error("TRANSCRIBE_UPLOAD_ERROR:", e);
     return res.status(500).json({
-      error: "transcribe_failed",
-      message: e?.message || "unknown",
+    debug: true,
+    error: "transcribe_failed",
+    message: e?.message || "unknown",
+    stack: e?.stack || null
     });
+
   }
 }
