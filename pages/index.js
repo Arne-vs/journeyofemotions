@@ -208,7 +208,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript: text || "" }),
       });
-      if (!musicRes.ok) throw new Error(`Track-selectie faalde: ${await musicRes.text()}`);
+      if (!musicRes.ok) throw new Error(`Track-selectie faalde: ${await safeTxt(musicRes)}`);
       const pick = await musicRes.json();
 
       setTimeout(async () => {
@@ -443,5 +443,17 @@ function SlideArtwork({ imageUrl }) {
 }
 
 async function safeTxt(r) {
-  try { return JSON.stringify(await r.json()); } catch { return await r.text(); }
+  const c = r.clone();               // 👈 lees van een clone, body blijft intact
+  try {
+    // probeer JSON netjes te serializen
+    const j = await c.json();
+    return JSON.stringify(j);
+  } catch {
+    try {
+      return await c.text();
+    } catch {
+      return "[unreadable body]";
+    }
+  }
 }
+
