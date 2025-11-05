@@ -187,15 +187,16 @@ async function startRecording() {
       stopMusicRef.current = null;
     }
 
-   // 1) Transcribe
-const transcribeRes = await fetch("/api/transcribe-upload", {
+  // 1) Transcribe
+const res = await fetch("/api/transcribe-upload", {
   method: "POST",
-  headers: { "Content-Type": "application/octet-stream" }, // simple, robust
-  body: blob,
+  headers: { "Content-Type": "application/octet-stream" },
+  body: blob
 });
-if (!transcribeRes.ok) throw new Error(`Transcribe faalde: ${await safeTxt(transcribeRes)}`);
-const { text } = await transcribeRes.json();
-setTranscript(text || "");
+const raw = await res.clone().text();
+if (!res.ok) throw new Error("Transcribe faalde: " + raw);
+const { text } = JSON.parse(raw);
+
 
 
     // 2) Prompt → parameters

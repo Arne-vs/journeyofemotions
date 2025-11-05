@@ -1,23 +1,15 @@
-// /pages/api/transcribe-upload.js
 import { openai } from "../../lib/openai";
 import { toFile } from "openai/uploads";
 
-// Force raw body (no JSON parsing)
 export const config = { api: { bodyParser: false } };
 
-// Read raw stream to Buffer
 async function readBuffer(req) {
   const chunks = [];
-  for await (const chunk of req) chunks.push(chunk);
+  for await (const c of req) chunks.push(c);
   return Buffer.concat(chunks);
 }
 
 export default async function handler(req, res) {
-    console.log("=== TRANSCRIBE ROUTE HIT ===");
-    console.log("Method:", req.method);
-    console.log("Headers:", req.headers);
-
-  // allow OPTIONS/HEAD to avoid preflight 405s
   if (req.method === "OPTIONS" || req.method === "HEAD") {
     res.setHeader("Allow", "POST, OPTIONS, HEAD");
     return res.status(200).end();
@@ -29,22 +21,8 @@ export default async function handler(req, res) {
 
   try {
     const buf = await readBuffer(req);
-    console.log("Buffer size:", buf.length);
-    const size = buf?.length || 0;
-    if (!size) {
-      return res.status(400).json({ error: "empty_audio", message: "No audio bytes received" });
-    }
+    if (!buf?.length) return res.status(400).json({ error: "empty_audio" });
 
-    // keep well under Vercel Function body limits
-    const MAX_BYTES = 6 * 1024 * 1024;
-    if (size > MAX_BYTES) {
-      return res.status(413).json({
-        error: "payload_too_large",
-        message: `Audio too large: ${(size / 1024 / 1024).toFixed(2)}MB`,
-      });
-    }
-
-    // detect extension from content-type (fallback webm)
     const ct = String(req.headers["content-type"] || "application/octet-stream").toLowerCase();
     let ext = "webm";
     if (ct.includes("mp4") || ct.includes("m4a")) ext = "m4a";
@@ -55,20 +33,12 @@ export default async function handler(req, res) {
 
     const resp = await openai.audio.transcriptions.create({
       model: "whisper-1",
-      file,
-      // language: "nl",
-      // temperature: 0,
+      file
     });
 
     return res.status(200).json({ text: resp.text || "" });
   } catch (e) {
     console.error("TRANSCRIBE_UPLOAD_ERROR:", e);
-    return res.status(500).json({
-    debug: true,
-    error: "transcribe_failed",
-    message: e?.message || "unknown",
-    stack: e?.stack || null
-    });
-
+    return res.status(500).json({ error: "transcribe_failed", message: e?.message || "unknown" });
   }
 }
