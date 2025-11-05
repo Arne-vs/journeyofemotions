@@ -188,14 +188,26 @@ async function startRecording() {
     }
 
   // 1) Transcribe
+  // 1) Transcribe
 const res = await fetch("/api/transcribe-upload", {
   method: "POST",
-  headers: { "Content-Type": "application/octet-stream" },
-  body: blob
+  headers: {
+    "Content-Type": "application/octet-stream",
+    "x-debug": "1" // ⬅️ temp: ask server to echo size & contentType
+  },
+  body: blob,
 });
+
 const raw = await res.clone().text();
+console.log("TRANSCRIBE RAW RESPONSE:", raw);
+
 if (!res.ok) throw new Error("Transcribe faalde: " + raw);
+
+// If you still have x-debug set, the server returns {ok,size,...} (not text).
+// Remove the "x-debug" header after you confirm size>0,
+// then parse the JSON result as normal:
 const { text } = JSON.parse(raw);
+setTranscript(text || "");
 
 
 
