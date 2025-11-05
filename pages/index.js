@@ -98,54 +98,77 @@ export default function Home() {
     }
   }
 
-  // Start/Stop opname
-  async function startRecording() {
-    setError("");
-    setTranscript("");
-    setPromptJson(null);
-    setImageUrl("");
-    setNowPlaying("");
-    setStatus("recording");
+ // Start/Stop opname
+async function startRecording() {
+  setError("");
+  setTranscript("");
+  setPromptJson(null);
+  setImageUrl("");
+  setNowPlaying("");
+  setStatus("recording");
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          channelCount: 1,
-          noiseSuppression: true,
-          echoCancellation: true,
-          sampleRate: 44100,
-        },
-      });
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        channelCount: 1,
+        noiseSuppression: true,
+        echoCancellation: true,
+        sampleRate: 44100,
+      },
+    });
 
-      // iOS-friendly mime fallback
-      let mime = "audio/webm;codecs=opus";
+    // iOS-friendly mime fallback
+    let mime = "audio/webm;codecs=opus";
+    if (!MediaRecorder.isTypeSupported(mime)) {
+      mime = "audio/mp4;codecs=mp4a";
       if (!MediaRecorder.isTypeSupported(mime)) {
-        mime = "audio/mp4;codecs=mp4a";
-        if (!MediaRecorder.isTypeSupported(mime)) {
-          mime = "audio/webm";
-        }
+        mime = "audio/webm";
       }
-
-      const mr = new MediaRecorder(stream, { mimeType: mime });
-      chunksRef.current = [];
-      mr.ondataavailable = (e) => e.data.size && chunksRef.current.push(e.data);
-      mr.onstop = () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: mime });
-        runPipeline(blob).catch((e) => {
-          console.error(e);
-          setStatus("error");
-          setError(String(e?.message || e));
-        });
-      };
-      mediaRecorderRef.current = mr;
-      mr.start(100);
-    } catch (e) {
-      console.error(e);
-      setStatus("error");
-      setError("Kon de microfoon niet starten. Check permissies.");
     }
+
+    // ⚠️ verlaag bitrate om payload klein te houden
+    const options = {
+      mimeType: mime,
+      audioBitsPerSecond: 64_000, // 64 kbps ≈ ~0.5–1.2 MB per 10–15s
+    };
+
+    const mr = new MediaRecorder(stream, options);
+    chunksRef.current = [];
+
+    mr.ondataavailable = (e) => {
+      if (e.data && e.data.size) chunksRef.current.push(e.data);
+    };
+
+    // Hard cap op lengte om Vercel’s limiet te ontwijken
+    const MAX_MS = 12_000; // 12s
+    const safetyTimer = setTimeout(() => {
+      try { if (mr.state !== "inactive") mr.stop(); } catch {}
+    }, MAX_MS);
+
+    mr.onstop = () => {
+      clearTimeout(safetyTimer);
+      // tracks meteen sluiten
+      stream.getTracks().forEach((t) => t.stop());
+
+      const blob = new Blob(chunksRef.current, { type: mime });
+      runPipeline(blob).catch((e) => {
+        console.error(e);
+        setStatus("error");
+        setError(String(e?.message || e));
+      });
+    };
+
+    mediaRecorderRef.current = mr;
+
+    // kleine timeslice zodat data sneller flushed wordt
+    mr.start(250);
+  } catch (e) {
+    console.error(e);
+    setStatus("error");
+    setError("Kon de microfoon niet starten. Check permissies.");
   }
+}
+
 
   function stopRecording() {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
@@ -165,11 +188,11 @@ export default function Home() {
     }
 
     // 1) Transcribe
- const transcribeRes = await fetch("/api/transcribe", {
-  method: "POST",
-  headers: { "Content-Type": blob.type || "application/octet-stream" },
-  body: blob,
-});
+    const transcribeRes = await fetch("/api/transcribe", {
+      method: "POST",
+      headers: { "Content-Type": blob.type || "application/octet-stream" },
+      body: blob,
+    });
 
     if (!transcribeRes.ok) throw new Error(`Transcribe faalde: ${await safeTxt(transcribeRes)}`);
     const { text } = await transcribeRes.json();
