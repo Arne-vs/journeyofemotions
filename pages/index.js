@@ -1,34 +1,29 @@
 // /pages/index.js
 import { useEffect, useRef, useState } from "react";
-import { playTrack } from "../lib/musicPlayer";
 
 // === THEME TOKENS (koppel hier je Figma-styling) ===
 const THEME = {
-  bg: "#0A0D14",                     // achtergrond
-  fg: "#E6ECFF",                     // hoofdtekst
-  accent: "#5EA1FF",                 // accenten
-  muted: "rgba(255,255,255,.55)",    // subtiele tekst
+  bg: "#0A0D14",
+  fg: "#E6ECFF",
+  accent: "#5EA1FF",
+  muted: "rgba(255,255,255,.55)",
   error: "#EF4444",
   ok: "#10B981",
   fontFamily:
     'Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial',
-  titleSize: 48,          // Idle/Recording headline
-  subtitleSize: 18,       // subteksten
-  ctaSize: 18,            // knoppen/CTA
+  titleSize: 48,
+  subtitleSize: 18,
+  ctaSize: 18,
 };
 
 // === Beeldinstellingen (beamer) ===
-// GPT-Image-1 → "1536x1024"  •  DALL·E 3 → "1792x1024"
-const IMAGE_SIZE = "1344×768";
+// let op: kleine 'x' — geen '×'
+const IMAGE_SIZE = "1344x768";
 const IMAGE_QUALITY = "low"; // "low" | "medium" | "high"
 
 // Auto-restart in ms
 const AUTO_RESTART_MS = 45_000;
 
-// Volledig scherm “hit area” gedrag per slide
-// - idle: tap => start
-// - recording: tap => stop
-// - processing/done: tap disabled (optioneel veranderen)
 export default function Home() {
   const [status, setStatus] = useState("idle"); // idle | recording | processing | done | error
   const [error, setError] = useState("");
@@ -38,14 +33,14 @@ export default function Home() {
   const [prevImageUrl, setPrevImageUrl] = useState("");
   const [nowPlaying, setNowPlaying] = useState("");
   const [isSupported, setIsSupported] = useState(true);
-  const [fade, setFade] = useState(false); // fade-to-black tussen cycli
+  const [fade, setFade] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const stopMusicRef = useRef(null);
   const autoRestartRef = useRef(null);
 
-  // ====== iPad/Safari wake lock (voorkomt dat scherm slaapt) ======
+  // iPad/Safari wake lock
   useEffect(() => {
     let lock;
     async function keepAwake() {
@@ -59,14 +54,14 @@ export default function Home() {
     };
   }, []);
 
-  // ====== Feature detect ======
+  // Feature detect
   useEffect(() => {
     if (typeof window === "undefined") return;
     const ok = !!(navigator.mediaDevices && window.MediaRecorder);
     setIsSupported(ok);
   }, []);
 
-  // ====== Cleanup muziek bij unmount ======
+  // Cleanup bij unmount
   useEffect(() => {
     return () => {
       if (stopMusicRef.current) {
@@ -80,22 +75,15 @@ export default function Home() {
     };
   }, []);
 
-  // ====== Fullscreen tap handler ======
+  // Volledig scherm tik-gedrag
   function onFullTap() {
     if (!isSupported) return;
-
-    if (status === "idle") {
-      startRecording();
-      return;
-    }
-    if (status === "recording") {
-      stopRecording();
-      return;
-    }
-    // processing/done: tappen doet niets (kan je aanpassen)
+    if (status === "idle") { startRecording(); return; }
+    if (status === "recording") { stopRecording(); return; }
+    // processing/done: tik doet niets
   }
 
-  // ====== Reset helper ======
+  // Reset helper
   function handleReset() {
     setStatus("idle");
     setError("");
@@ -104,14 +92,13 @@ export default function Home() {
     setPrevImageUrl(imageUrl);
     setImageUrl("");
     setNowPlaying("");
-
     if (stopMusicRef.current) {
       try { stopMusicRef.current(); } catch {}
       stopMusicRef.current = null;
     }
   }
 
-  // ====== Start/Stop opname ======
+  // Start/Stop opname
   async function startRecording() {
     setError("");
     setTranscript("");
@@ -166,7 +153,7 @@ export default function Home() {
     }
   }
 
-  // ====== Pipeline ======
+  // Pipeline
   async function runPipeline(blob) {
     setStatus("processing");
     setError("");
@@ -197,7 +184,7 @@ export default function Home() {
     const prompt = await promptRes.json();
     setPromptJson(prompt);
 
-    // 3) Image (eerst beeld genereren)
+    // 3) Image
     const imgRes = await fetch("/api/image", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -214,7 +201,7 @@ export default function Home() {
     const url = "data:image/png;base64," + imageBase64;
     setImageUrl(url);
 
-    // 4) Dan muziek kiezen & starten (kleine delay voor impact)
+    // 4) Muziek kiezen & starten (pas nadat het beeld er is)
     try {
       const musicRes = await fetch("/api/choose-track", {
         method: "POST",
@@ -225,6 +212,8 @@ export default function Home() {
       const pick = await musicRes.json();
 
       setTimeout(async () => {
+        // dynamische import om SSR issues te vermijden
+        const { playTrack } = await import("../lib/musicPlayer");
         stopMusicRef.current = await playTrack(pick.url, { fadeIn: 1, fadeOut: 0.9 });
         setNowPlaying(`🎵 ${pick.title}${pick.reason ? " — " + pick.reason : ""}`);
       }, 600);
@@ -235,7 +224,7 @@ export default function Home() {
 
     setStatus("done");
 
-   // 5) Auto-restart na X seconden met fade-to-black
+    // 5) Auto-restart na X seconden met fade-to-black (terug naar startscherm)
     if (autoRestartRef.current) clearTimeout(autoRestartRef.current);
     autoRestartRef.current = setTimeout(() => {
       setFade(true);
@@ -246,11 +235,9 @@ export default function Home() {
             stopMusicRef.current = null;
           }
         } catch {}
-        // Ga terug naar het startscherm (Idle), wacht op tik
         handleReset();
         setFade(false);
-        // NIET opnieuw automatisch starten
-      }, 700); // fade-duur
+      }, 700);
     }, AUTO_RESTART_MS);
   }
 
@@ -270,9 +257,9 @@ export default function Home() {
       }}
     >
       {/* SLIDES */}
-      {status === "idle" && <SlideIdle supported={isSupported} />}
+      {status === "idle" && <SlideIdle />}
       {status === "recording" && <SlideRecording />}
-      {status === "processing" && <SlideProcessing prevImageUrl={prevImageUrl} />}
+      {status === "processing" && <SlideProcessing />}
       {(status === "done" || imageUrl) && <SlideArtwork imageUrl={imageUrl} />}
 
       {/* NOW PLAYING OVERLAY */}
@@ -299,7 +286,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* FADE TO BLACK tussen cycli */}
+      {/* FADE TO BLACK */}
       {fade && (
         <div style={{
           position: "fixed", inset: 0, background: "#000",
@@ -316,13 +303,11 @@ export default function Home() {
 function SplitScreenSlide({ leftTitle, leftSub, rightTitle, rightSub, children }) {
   return (
     <div style={{ position:"fixed", inset:0, width:"100vw", height:"100vh", overflow:"hidden" }}>
-      {/* WITTE BASISLAAG (volledig scherm) */}
+      {/* WITTE BASISLAAG */}
       <div style={{ position:"absolute", inset:0, background:"#fff" }} />
 
       {/* ZWARTE LAAG MET GEKARTELDE RAND */}
-      <div className="splitRight" style={{
-        position:"absolute", inset:0, background:"#000"
-      }} />
+      <div className="splitRight" style={{ position:"absolute", inset:0, background:"#000" }} />
 
       {/* LINKER TEKST (ENG) */}
       <div style={{
@@ -330,7 +315,7 @@ function SplitScreenSlide({ leftTitle, leftSub, rightTitle, rightSub, children }
         top:"50%", left:"6vw", transform:"translateY(-50%)",
         color:"#000", textAlign:"left", maxWidth:"38vw", pointerEvents:"none"
       }}>
-        <h1 style={{  color:"#000", margin:0, fontWeight:800, letterSpacing:0.2 }}>
+        <h1 style={{ color:"#000", margin:0, fontWeight:800, letterSpacing:0.2 }}>
           {leftTitle}
         </h1>
         {leftSub && (
@@ -356,50 +341,48 @@ function SplitScreenSlide({ leftTitle, leftSub, rightTitle, rightSub, children }
         )}
       </div>
 
-      {/* optionele overlay (loader etc.) */}
+      {/* overlay (loader etc.) */}
       <div style={{ position:"absolute", inset:0, pointerEvents:"none" }}>
         {children}
       </div>
 
-      {/* CLIP-PATH SHAPE (responsief, voelt als jouw Figma) */}
+      {/* CLIP-PATH SHAPE */}
       <style jsx>{`
-  .splitRight {
-  clip-path: polygon(
-    62% 0%,
-    100% 0%,
-    100% 100%,
-    45% 100%,
-    52% 82%,
-    42% 82%,
-    48% 68%,
-    46% 60%,
-    55% 54%,
-    50% 40%,
-    58% 28%,
-    68% 18%,
-    53% 14%
-  );
-}
-
-@media (max-width: 1024px) {
-  .splitRight {
-    clip-path: polygon(
-      55% 0%,
-      100% 0%,
-      100% 100%,
-      48% 100%,
-      56% 80%,
-      76% 80%,
-      50% 65%,
-      60% 50%,
-      52% 35%,
-      63% 20%,
-      55% 10%
-    );
-  }
-}
-`}</style>
-
+        .splitRight {
+          clip-path: polygon(
+            62% 0%,
+            100% 0%,
+            100% 100%,
+            45% 100%,
+            52% 82%,
+            42% 82%,
+            48% 68%,
+            46% 60%,
+            55% 54%,
+            50% 40%,
+            58% 28%,
+            68% 18%,
+            53% 14%
+          );
+        }
+        @media (max-width: 1024px) {
+          .splitRight {
+            clip-path: polygon(
+              55% 0%,
+              100% 0%,
+              100% 100%,
+              48% 100%,
+              56% 80%,
+              76% 80%,
+              50% 65%,
+              60% 50%,
+              52% 35%,
+              63% 20%,
+              55% 10%
+            );
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -420,8 +403,8 @@ function SlideRecording() {
     <SplitScreenSlide
       leftTitle="Tell us your imagination"
       leftSub="press to stop"
-      rightTitle="Cuéntanos lo que te estas imaginando"
-      rightSub="Pulse para parrar"
+      rightTitle="Cuéntanos lo que te estás imaginando"
+      rightSub="Pulse para parar"
     />
   );
 }
@@ -434,7 +417,7 @@ function SlideProcessing() {
       rightTitle="Procesando..."
       rightSub="Por favor, espere"
     >
-      {/* eventueel een loader animatie hier */}
+      {/* loader kan hier */}
     </SplitScreenSlide>
   );
 }
@@ -449,7 +432,7 @@ function SlideArtwork({ imageUrl }) {
           style={{
             width: "100vw",
             height: "100vh",
-            objectFit: "contain", // of "cover" voor edge-to-edge
+            objectFit: "contain",
             opacity: 1,
             transition: "opacity .4s ease",
           }}

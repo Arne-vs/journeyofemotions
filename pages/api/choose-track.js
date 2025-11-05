@@ -1,9 +1,6 @@
-// /pages/api/choose-track.js
-import fs from "fs";
-import path from "path";
+// pages/api/choose-track.js
 import { openai } from "../../lib/openai";
-
-const TRACKS_DIR = path.join(process.cwd(), "public", "audio", "tracks");
+import tracks from "../../data/tracks.json";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "method_not_allowed" });
@@ -13,56 +10,24 @@ export default async function handler(req, res) {
     const transcript = String(body?.transcript || "").trim();
     if (!transcript) return res.status(400).json({ error: "missing_transcript" });
 
-    // 1) scan map
-    let files = [];
-    try {
-      files = fs.readdirSync(TRACKS_DIR);
-    } catch (e) {
-      return res.status(500).json({ error: "tracks_dir_unreadable", message: e.message });
-    }
+    // Kandidaten uit manifest → public URL
+    const candidates = (tracks || []).map(t => ({
+      ...t,
+      url: `/audio/tracks/${encodeURIComponent(t.file)}`
+    }));
 
-    // 2) bouw kandidatenlijst
-    const mp3s = files.filter(f => f.toLowerCase().endsWith(".mp3"));
-    if (!mp3s.length) return res.status(404).json({ error: "no_tracks_found" });
+    if (!candidates.length) return res.status(404).json({ error: "no_tracks_found" });
 
-    const candidates = [];
-    for (const f of mp3s) {
-      const base = f.replace(/\.mp3$/i, "");
-      const metaPath = path.join(TRACKS_DIR, base + ".json");
-      let meta = {};
-      if (fs.existsSync(metaPath)) {
-        try { meta = JSON.parse(fs.readFileSync(metaPath, "utf8")); } catch {}
-      }
-      candidates.push({
-        id: base,
-        file: f,
-        title: meta.title || base,
-        tags: meta.tags || [],
-        mood: meta.mood || [],
-        tempo: meta.tempo || null,
-        key: meta.key || null,
-        url: `/audio/tracks/${encodeURIComponent(f)}`
-      });
-    }
+    const shortlist = candidates.slice(0, 80);
 
-    // Beperk lengte (tokenbesparing)
-    const MAX = 80;
-    const shortlist = candidates.slice(0, MAX);
-
-    // 3) Vraag AI om beste match (compacte instructie + JSON output)
-    const system = `Je krijgt een transcript en een lijst met muziek-kandidaten (met eenvoudige metadata).
-Kies precies 1 kandidaat die het best past bij de sfeer/inhoud.
-Geef ALLEEN JSON: {"id":"<kandidaten-id>","reason":"korte motivatie (<=30 woorden)"}.`;
+    const system = `Je krijgt een transcript en een lijst met muziek-kandidaten.
+Kies exact 1 kandidaat die het best past bij sfeer/inhoud.
+Antwoord ALLEEN als JSON: {"id":"<file>","reason":"<=30 woorden"}.`;
 
     const user = {
       transcript,
       candidates: shortlist.map(c => ({
-        id: c.id,
-        title: c.title,
-        tags: c.tags,
-        mood: c.mood,
-        tempo: c.tempo,
-        key: c.key
+        id: c.file, title: c.title, tags: c.tags, mood: c.mood, tempo: c.tempo, key: c.key
       }))
     };
 
@@ -77,18 +42,15 @@ Geef ALLEEN JSON: {"id":"<kandidaten-id>","reason":"korte motivatie (<=30 woorde
       max_tokens: 200
     });
 
-    let content = resp?.choices?.[0]?.message?.content || "";
     let pick;
-    try { pick = JSON.parse(content); } catch {
-      return res.status(502).json({ error: "invalid_model_json", raw: content });
-    }
+    try { pick = JSON.parse(resp?.choices?.[0]?.message?.content || "{}"); } catch {}
+    const chosen = shortlist.find(c => c.file === pick?.id) || shortlist[0];
 
-    const chosen = shortlist.find(c => c.id === pick.id) || shortlist[0];
     return res.json({
-      id: chosen.id,
+      id: chosen.file,
       title: chosen.title,
       url: chosen.url,
-      reason: pick.reason || "auto"
+      reason: pick?.reason || "auto"
     });
   } catch (e) {
     console.error("CHOOSE_TRACK_ERROR:", e);
