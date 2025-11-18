@@ -419,8 +419,8 @@ function SlideIdle() {
   return (
     <SplitScreenSlide
       leftTitle="TresPassing"
-      leftSub="press to start"
-      rightTitle="TrasPasar"
+      leftSub="Prem per començar"
+      rightTitle="TresPassing"
       rightSub="Pulse para empezar"
     />
   );
@@ -429,8 +429,8 @@ function SlideIdle() {
 function SlideRecording() {
   return (
     <SplitScreenSlide
-      leftTitle="Tell us your imagination"
-      leftSub="press to stop"
+      leftTitle="Explica’m què t’estàs imaginant"
+      leftSub="Prem per aturar"
       rightTitle="Cuéntanos lo que te estás imaginando"
       rightSub="Pulse para parar"
     />
@@ -440,10 +440,10 @@ function SlideRecording() {
 function SlideProcessing() {
   return (
     <SplitScreenSlide
-      leftTitle="Processing..."
-      leftSub="please wait"
+      leftTitle="processant..."
+      leftSub="Per favor, espera"
       rightTitle="Procesando..."
-      rightSub="Por favor, espere"
+      rightSub="Por favor espere"
     >
       {/* loader kan hier */}
     </SplitScreenSlide>
