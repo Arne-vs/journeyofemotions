@@ -290,18 +290,6 @@ setTranscript(text || "");
       {status === "processing" && <SlideProcessing />}
       {(status === "done" || imageUrl) && <SlideArtwork imageUrl={imageUrl} />}
 
-      {/* NOW PLAYING OVERLAY */}
-      {nowPlaying && (
-        <div style={{
-          position: "fixed", left: 12, bottom: 12, zIndex: 3,
-          background: "rgba(0,0,0,.45)", color: THEME.fg,
-          padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(255,255,255,.12)",
-          backdropFilter: "blur(6px)", fontSize: 14
-        }}>
-          {nowPlaying}
-        </div>
-      )}
-
       {/* ERROR OVERLAY */}
       {error && (
         <div style={{
@@ -419,9 +407,9 @@ function SlideIdle() {
   return (
     <SplitScreenSlide
       leftTitle="TresPassing"
-      leftSub="Prem per començar"
+      leftSub="Prem la tablet per començar"
       rightTitle="TresPassing"
-      rightSub="Pulse para empezar"
+      rightSub="Pulsa la tablet para empezar"
     />
   );
 }
@@ -429,10 +417,10 @@ function SlideIdle() {
 function SlideRecording() {
   return (
     <SplitScreenSlide
-      leftTitle="Explica’m què t’estàs imaginant"
-      leftSub="Prem per aturar"
-      rightTitle="Cuéntanos lo que te estás imaginando"
-      rightSub="Pulse para parar"
+      leftTitle="Di en voz alta algo que se te ocurra"
+      leftSub="Prem la tablet per aturar"
+      rightTitle="Digues en veu alta alguna cosa que se t’acudeixi"
+      rightSub="Pulsa la tablet para detener"
     />
   );
 }
@@ -440,10 +428,10 @@ function SlideRecording() {
 function SlideProcessing() {
   return (
     <SplitScreenSlide
-      leftTitle="processant..."
-      leftSub="Per favor, espera"
+      leftTitle="Processant..."
+      leftSub="Por favor, espera. Ten paciencia"
       rightTitle="Procesando..."
-      rightSub="Por favor espere"
+      rightSub="Si us plau, espera. Tingues paciència"
     >
       {/* loader kan hier */}
     </SplitScreenSlide>
